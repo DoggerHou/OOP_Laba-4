@@ -18,8 +18,8 @@ namespace OOP_Laba_4
         {
             InitializeComponent();
         }
-        KeyEventArgs Kostil = new KeyEventArgs(Keys.A);//это самый что ни на есть костыль....
         Storage myStorage = new Storage();
+        bool controlUp = false;
         private void pictureBox_Paint(object sender, PaintEventArgs e)
         {
             for (int i = 0; i < myStorage.getSize(); i++)
@@ -31,23 +31,29 @@ namespace OOP_Laba_4
 
         private void pictureBox_MouseDown(object sender, MouseEventArgs e)
         {
-            myStorage.AddObject(new CCircle(e.Location), e, Kostil);
+            myStorage.AddObject(new CCircle(e.Location), e, controlUp);
             label1.Text = myStorage.getSize().ToString();
             pictureBox.Invalidate();
         }
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            Kostil = e;
-            if (e.KeyData == Keys.Delete)
+            if(e.Control)
+                controlUp = true;
+            else if (e.KeyData == Keys.Delete)
                 myStorage.deleteDetailedCCircle();
             label1.Text = myStorage.getSize().ToString();
             pictureBox.Invalidate();
+        }
+
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+            controlUp = false;
         }
     }
 
     public class CCircle 
     {
-        private const int RADIX = 40;
+        private const int RADIX = 80;
         private Point location;
         private bool detail;
         public CCircle(Point location)
@@ -66,14 +72,14 @@ namespace OOP_Laba_4
         public void OnPaint(PaintEventArgs e)
         {
             if(detail == false)
-                e.Graphics.DrawEllipse(new Pen(Color.Red,5f), location.X, location.Y, RADIX, RADIX);
+                e.Graphics.DrawEllipse(new Pen(Color.Red,5f), location.X - RADIX/2, location.Y - RADIX/2, RADIX, RADIX);
             else
-                e.Graphics.DrawEllipse(new Pen(Color.Black, 8f), location.X, location.Y, RADIX, RADIX);
+                e.Graphics.DrawEllipse(new Pen(Color.Black, 8f), location.X - RADIX/2, location.Y - RADIX/2, RADIX, RADIX);
         }
-        public bool isPicked(MouseEventArgs e, KeyEventArgs kostil)
+        public bool isPicked(MouseEventArgs e, bool controlUp)
         {
-            if (Math.Pow(location.X - e.X, 2) + Math.Pow(location.Y - e.Y, 2) <= RADIX * RADIX & 
-                kostil.Control)
+            if (Math.Pow(location.X - e.X, 2) + Math.Pow(location.Y - e.Y, 2) <= RADIX * RADIX  
+                & controlUp )
             {
                 detail = true;
                 return true;
@@ -90,10 +96,10 @@ namespace OOP_Laba_4
         {
             objects = new List<CCircle>();
         }
-        public void AddObject(CCircle temp_object, MouseEventArgs e, KeyEventArgs kostil)  //добавляет объект
+        public void AddObject(CCircle temp_object, MouseEventArgs e, bool controlUp)  //добавляет объект
         {
             for (int i = 0; i < objects.Count(); i++)
-                if (objects[i].isPicked(e, kostil) == true)
+                if (objects[i].isPicked(e, controlUp) == true)
                 {
                     return;
                 }
